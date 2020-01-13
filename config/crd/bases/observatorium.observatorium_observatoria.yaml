@@ -37,26 +37,30 @@ spec:
             thanos:
               description: Thanos Spec
               properties:
-                compactorReplicas:
-                  description: Number of instances to deploy for a Thanos Compactor.
-                  format: int32
-                  type: integer
-                compactorResources:
-                  description: Resources for Compactor pods
+                compactor:
+                  description: Thanos CompactorSpec
                   properties:
-                    limits:
-                      additionalProperties:
-                        type: string
-                      description: 'Limits describes the maximum amount of compute
-                        resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
-                      type: object
-                    requests:
-                      additionalProperties:
-                        type: string
-                      description: 'Requests describes the minimum amount of compute
-                        resources required. If Requests is omitted for a container,
-                        it defaults to Limits if that is explicitly specified, otherwise
-                        to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                    replicas:
+                      format: int32
+                      type: integer
+                    resources:
+                      description: Resources for Querier pods
+                      properties:
+                        limits:
+                          additionalProperties:
+                            type: string
+                          description: 'Limits describes the maximum amount of compute
+                            resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                          type: object
+                        requests:
+                          additionalProperties:
+                            type: string
+                          description: 'Requests describes the minimum amount of compute
+                            resources required. If Requests is omitted for a container,
+                            it defaults to Limits if that is explicitly specified,
+                            otherwise to an implementation-defined value. More info:
+                            https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                          type: object
                       type: object
                   type: object
                 image:
@@ -65,82 +69,69 @@ spec:
                 objectStoreConfigSecret:
                   description: Object Store Config Secret for Thanos
                   type: string
-                querierReplicas:
-                  description: Number of instances to deploy for a Thanos querier.
-                  format: int32
-                  type: integer
-                querierResources:
-                  description: Resources for Querier pods
+                querier:
+                  description: Thanos QuerierSpec
                   properties:
-                    limits:
-                      additionalProperties:
-                        type: string
-                      description: 'Limits describes the maximum amount of compute
-                        resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
-                      type: object
-                    requests:
-                      additionalProperties:
-                        type: string
-                      description: 'Requests describes the minimum amount of compute
-                        resources required. If Requests is omitted for a container,
-                        it defaults to Limits if that is explicitly specified, otherwise
-                        to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                    replicas:
+                      format: int32
+                      type: integer
+                    resources:
+                      description: Resources for Querier pods
+                      properties:
+                        limits:
+                          additionalProperties:
+                            type: string
+                          description: 'Limits describes the maximum amount of compute
+                            resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                          type: object
+                        requests:
+                          additionalProperties:
+                            type: string
+                          description: 'Requests describes the minimum amount of compute
+                            resources required. If Requests is omitted for a container,
+                            it defaults to Limits if that is explicitly specified,
+                            otherwise to an implementation-defined value. More info:
+                            https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                          type: object
                       type: object
                   type: object
-                receivePvcSize:
-                  description: Receive PVC size
-                  type: string
-                receiveReplicas:
-                  description: Number of instances to deploy for a Thanos Receive.
-                  format: int32
-                  type: integer
-                receiveResources:
-                  description: Resources for Receive pods
+                receive:
+                  description: Thanos ReceiveSpec
                   properties:
-                    limits:
-                      additionalProperties:
-                        type: string
-                      description: 'Limits describes the maximum amount of compute
-                        resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                    pvcSize:
+                      description: Receive PVC size
+                      type: string
+                    replicas:
+                      format: int32
+                      type: integer
+                    resources:
+                      description: Resources for Receive pods
+                      properties:
+                        limits:
+                          additionalProperties:
+                            type: string
+                          description: 'Limits describes the maximum amount of compute
+                            resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                          type: object
+                        requests:
+                          additionalProperties:
+                            type: string
+                          description: 'Requests describes the minimum amount of compute
+                            resources required. If Requests is omitted for a container,
+                            it defaults to Limits if that is explicitly specified,
+                            otherwise to an implementation-defined value. More info:
+                            https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                          type: object
                       type: object
-                    requests:
-                      additionalProperties:
-                        type: string
-                      description: 'Requests describes the minimum amount of compute
-                        resources required. If Requests is omitted for a container,
-                        it defaults to Limits if that is explicitly specified, otherwise
-                        to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
-                      type: object
+                    rstorageClass:
+                      description: Receive Storage Class
+                      type: string
+                  required:
+                  - pvcSize
+                  - rstorageClass
                   type: object
-                receiveStorageClass:
-                  description: Receive Storage Class
-                  type: string
-                storeReplicas:
-                  description: Number of instances to deploy for a Thanos Store.
-                  format: int32
-                  type: integer
-                storeResources:
-                  description: Resources for Store pods
-                  properties:
-                    limits:
-                      additionalProperties:
-                        type: string
-                      description: 'Limits describes the maximum amount of compute
-                        resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
-                      type: object
-                    requests:
-                      additionalProperties:
-                        type: string
-                      description: 'Requests describes the minimum amount of compute
-                        resources required. If Requests is omitted for a container,
-                        it defaults to Limits if that is explicitly specified, otherwise
-                        to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
-                      type: object
-                  type: object
-                tag:
-                  description: Tag of Thanos sidecar container image to be deployed.
-                  type: string
-                thanosReceiveControllerSpec:
+                receiveControllerSpec:
+                  description: Thanos Receive Controller Spec
                   properties:
                     hashrings:
                       description: Hashrings describes a list of Hashrings
@@ -168,13 +159,44 @@ spec:
                   required:
                   - image
                   type: object
+                store:
+                  description: Thanos StoreSpec
+                  properties:
+                    replicas:
+                      format: int32
+                      type: integer
+                    resources:
+                      description: Resources for Querier pods
+                      properties:
+                        limits:
+                          additionalProperties:
+                            type: string
+                          description: 'Limits describes the maximum amount of compute
+                            resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                          type: object
+                        requests:
+                          additionalProperties:
+                            type: string
+                          description: 'Requests describes the minimum amount of compute
+                            resources required. If Requests is omitted for a container,
+                            it defaults to Limits if that is explicitly specified,
+                            otherwise to an implementation-defined value. More info:
+                            https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                          type: object
+                      type: object
+                  type: object
+                tag:
+                  description: Tag of Thanos sidecar container image to be deployed.
+                  type: string
               required:
+              - compactor
               - image
               - objectStoreConfigSecret
-              - receivePvcSize
-              - receiveStorageClass
+              - querier
+              - receive
+              - receiveControllerSpec
+              - store
               - tag
-              - thanosReceiveControllerSpec
               type: object
           required:
           - thanos
