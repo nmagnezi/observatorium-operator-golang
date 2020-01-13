@@ -1,0 +1,26 @@
+# permissions to do edit observatoria.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: observatorium-editor-role
+rules:
+- apiGroups:
+  - observatorium.observatorium
+  resources:
+  - observatoria
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - observatorium.observatorium
+  resources:
+  - observatoria/status
+  verbs:
+  - get
+  - patch
+  - update

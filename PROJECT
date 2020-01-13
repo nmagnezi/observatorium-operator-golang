@@ -1,0 +1,7 @@
+domain: observatorium
+repo: github.com/observatorium-operator
+resources:
+- group: observatorium
+  kind: Observatorium
+  version: v1alpha1
+version: "2"

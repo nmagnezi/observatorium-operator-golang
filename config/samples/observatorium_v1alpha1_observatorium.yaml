@@ -1,0 +1,7 @@
+apiVersion: observatorium.observatorium/v1alpha1
+kind: Observatorium
+metadata:
+  name: observatorium-sample
+spec:
+  # Add fields here
+  foo: bar
