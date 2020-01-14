@@ -258,7 +258,6 @@ spec:
                   type: string
               required:
               - compactor
-              - image
               - objectStoreConfigSecret
               - querier
               - querier-cache
