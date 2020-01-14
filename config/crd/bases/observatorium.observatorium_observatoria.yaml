@@ -123,14 +123,14 @@ spec:
                             https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                           type: object
                       type: object
-                    rstorageClass:
+                    storageClass:
                       description: Receive Storage Class
                       type: string
                   required:
                   - pvcSize
-                  - rstorageClass
+                  - storageClass
                   type: object
-                receiveControllerSpec:
+                receiveController:
                   description: Thanos Receive Controller Spec
                   properties:
                     hashrings:
@@ -194,7 +194,7 @@ spec:
               - objectStoreConfigSecret
               - querier
               - receive
-              - receiveControllerSpec
+              - receiveController
               - store
               - tag
               type: object
