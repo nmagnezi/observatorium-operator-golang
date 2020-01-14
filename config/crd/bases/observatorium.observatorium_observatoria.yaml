@@ -258,13 +258,13 @@ spec:
                   type: string
               required:
               - compactor
+              - image
               - objectStoreConfigSecret
               - querier
               - querier-cache
               - receive
               - receiveController
               - store
-              - tag
               type: object
           required:
           - thanos
