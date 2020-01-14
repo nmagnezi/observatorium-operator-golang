@@ -35,7 +35,7 @@ type ReceiveController struct {
 	Hashrings []*Hashring `json:"hashrings,omitempty"`
 }
 
-type ReceiveSpec struct {
+type ThanosPersistentSpec struct {
 	Replicas *int32 `json:"replicas,omitempty"`
 	// Resources for Receive pods
 	Resources v1.ResourceRequirements `json:"resources,omitempty"`
@@ -66,12 +66,12 @@ type ThanosSpec struct {
 	Tag *string `json:"tag"`
 	// Thanos Receive Controller Spec
 	ReceiveControllerSpec ReceiveController `json:"receiveController"`
-	// Thanos ReceiveSpec
-	Receive ReceiveSpec `json:"receive"`
+	// Thanos ThanosPersistentSpec
+	Receive ThanosPersistentSpec `json:"receive"`
 	// Thanos QuerierSpec
 	Querier ThanosComponentSpec `json:"querier"`
 	// Thanos StoreSpec
-	Store ThanosComponentSpec `json:"store"`
+	Store ThanosPersistentSpec `json:"store"`
 	// Thanos CompactorSpec
 	Compactor ThanosComponentSpec `json:"compactor"`
 
