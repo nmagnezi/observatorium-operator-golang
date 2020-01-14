@@ -5,13 +5,43 @@ metadata:
 spec:
   thanos:
     image: quay.io/thanos/thanos:v0.9.0
-    querierReplicas: 3
-    querierResources:
-    storeReplicas: 1
-    storeResources: 
-    compactorReplicas: 1
-    compactorResources:
-    receiveReplicas:
-    receiveResources:
-    receiveStorageClass: standard
+    querier:
+      replicas: 3
+      resources:
+        requests:
+          cpu: 20m
+          memory: 50Mi
+    store:
+      replicas: 1
+      resources:
+        requests:
+          cpu: 100m
+          memory: 100Mi
+        limits:
+          cpu: "2"
+          memory: 8Gi
+    compactor:
+      replicas: 1
+      resources:
+        requests:
+          cpu: 100m
+          memory: 100Mi
+    receive:
+      replicas: 3
+      resources:
+        requests:
+          cpu: 100m
+          memory: 100Mi
+      storageClass: standard
+      pvcSize: 50Gi
+    receiveController:
+      image: quay.io/observatorium/thanos-receive-controller
+      hashrings:
+        - hashring0:
+            tenants:
+              - foo
+              - bar
+        - hashring1:
+            tenants:
+              - baz
 

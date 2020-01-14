@@ -35,17 +35,15 @@ type ReceiveController struct {
 	Hashrings []*Hashring `json:"hashrings,omitempty"`
 }
 
-
 type ReceiveSpec struct {
 	Replicas *int32 `json:"replicas,omitempty"`
 	// Resources for Receive pods
 	Resources v1.ResourceRequirements `json:"resources,omitempty"`
 	// Receive Storage Class
-	StorageClass *string `json:"rstorageClass"`
+	StorageClass *string `json:"storageClass"`
 	// Receive PVC size
 	PVCSize *string `json:"pvcSize"`
 }
-
 
 type ThanosComponentSpec struct {
 	Replicas *int32 `json:"replicas,omitempty"`
@@ -66,8 +64,8 @@ type ThanosSpec struct {
 	Image *string `json:"image"`
 	// Tag of Thanos sidecar container image to be deployed.
 	Tag *string `json:"tag"`
-    // Thanos Receive Controller Spec
-	ReceiveControllerSpec ReceiveController `json:"receiveControllerSpec"`
+	// Thanos Receive Controller Spec
+	ReceiveControllerSpec ReceiveController `json:"receiveController"`
 	// Thanos ReceiveSpec
 	Receive ReceiveSpec `json:"receive"`
 	// Thanos QuerierSpec
