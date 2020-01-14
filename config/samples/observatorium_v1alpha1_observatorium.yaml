@@ -5,6 +5,7 @@ metadata:
 spec:
   thanos:
     image: quay.io/thanos/thanos:v0.9.0
+    objectStoreConfigSecret: thanos-objectstorage
     querier:
       replicas: 3
       resources:
