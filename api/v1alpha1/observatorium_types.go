@@ -27,6 +27,7 @@ type ObservatoriumSpec struct {
 }
 
 type ReceiveController struct {
+	Replicas *int32 `json:"replicas,omitempty"`
 	// Thanos receive controller Image name
 	Image *string `json:"image"`
 	// Tag describes the tag of Thanos receive controller to use.
@@ -45,6 +46,18 @@ type ThanosPersistentSpec struct {
 	StorageClass *string `json:"storageClass"`
 	// Receive PVC size
 	PVCSize *string `json:"pvcSize"`
+}
+
+type QuerierCacheSpec struct {
+	// Thanos receive controller Image name
+	Image *string `json:"image"`
+	// ConfigMap describes the Configuration of Querier Cache.
+	ConfigMap *string `json:"config-map"`
+	// Number of Querier Cache replicas.
+	Replicas *int32 `json:"replicas,omitempty"`
+	// Resources for Receive pods
+	Resources v1.ResourceRequirements `json:"resources,omitempty"`
+	// Receive Storage Class
 }
 
 type ThanosComponentSpec struct {
@@ -72,6 +85,8 @@ type ThanosSpec struct {
 	Receive ThanosPersistentSpec `json:"receive"`
 	// Thanos QuerierSpec
 	Querier ThanosComponentSpec `json:"querier"`
+	// Thanos QuerierCache
+	QuerierCache QuerierCacheSpec `json:"querier-cache"`
 	// Thanos StoreSpec
 	Store ThanosPersistentSpec `json:"store"`
 	// Thanos CompactorSpec
