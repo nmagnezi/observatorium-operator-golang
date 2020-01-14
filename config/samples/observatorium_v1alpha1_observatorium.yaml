@@ -8,24 +8,43 @@ spec:
     querier:
       replicas: 3
       resources:
+        limits:
+          cpu: 1
+          memory: 1Gi
         requests:
-          cpu: 20m
-          memory: 50Mi
+          cpu: 100m
+          memory: 256Mi
+    querier-cache:
+      image: quay.io/cortexproject/cortex:master-8533a216
+      config-map: observatorium-cache-conf
+      replicas: 3
+      resources:
+        limits:
+          cpu: 1
+          memory: 1Gi
+        requests:
+          cpu: 100m
+          memory: 256Mi
     store:
       replicas: 1
       resources:
         requests:
-          cpu: 100m
-          memory: 100Mi
+          cpu: 32m
+          memory: 64Mi
         limits:
-          cpu: "2"
-          memory: 8Gi
+          cpu: 128m
+          memory: 128Mi
+      storageClass: standard
+      pvcSize: 50Gi
     compactor:
       replicas: 1
       resources:
+        limits:
+          cpu: 500m
+          memory: 2Gi
         requests:
           cpu: 100m
-          memory: 100Mi
+          memory: 1Gi
     receive:
       replicas: 3
       resources:
@@ -36,6 +55,14 @@ spec:
       pvcSize: 50Gi
     receiveController:
       image: quay.io/observatorium/thanos-receive-controller
+      replicas: 1
+      resources:
+        requests:
+          cpu: 10m
+          memory: 24Mi
+        limits:
+          cpu: 64m
+          memory: 128Mi
       hashrings:
         - hashring0:
             tenants:
