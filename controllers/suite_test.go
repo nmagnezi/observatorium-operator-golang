@@ -22,7 +22,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	observatoriumv1alpha1 "github.com/observatorium-operator/api/v1alpha1"
+	observatoriumv1alpha1 "github.com/nmagnezi/observatorium-operator/api/v1alpha1"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"

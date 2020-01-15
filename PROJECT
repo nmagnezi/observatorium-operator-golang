@@ -1,5 +1,5 @@
 domain: observatorium
-repo: github.com/observatorium-operator
+repo: github.com/nmagnezi/observatorium-operator
 resources:
 - group: observatorium
   kind: Observatorium
