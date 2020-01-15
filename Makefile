@@ -11,6 +11,9 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
+FIRST_GOPATH:=$(firstword $(subst :, ,$(shell go env GOPATH)))
+GOBINDATA_BIN=$(FIRST_GOPATH)/bin/go-bindata
+
 all: manager
 
 # Run tests
@@ -78,3 +81,7 @@ CONTROLLER_GEN=$(GOBIN)/controller-gen
 else
 CONTROLLER_GEN=$(shell which controller-gen)
 endif
+
+manifests/bindata.go: $(GOBINDATA_BIN)
+	# Using "-modtime 1" to make generate target deterministic. It sets all file time stamps to unix timestamp 1
+	go-bindata -mode 420 -modtime 1 -pkg manifests -o $@ assets/...
