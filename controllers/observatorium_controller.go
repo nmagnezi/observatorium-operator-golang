@@ -44,11 +44,12 @@ type ObservatoriumReconciler struct {
 
 func (r *ObservatoriumReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
-	_ = r.Log.WithValues("observatorium", req.NamespacedName)
+	log := r.Log.WithValues("observatorium", req.NamespacedName)
+	log.Info("Start Reconcile")
 
 	var observatorium observatoriumv1alpha1.Observatorium
 	if err := r.CrdClient.Get(ctx, req.NamespacedName, &observatorium); err != nil {
-		r.Log.Error(err, "unable to fetch Observatorium")
+		log.Error(err, "unable to fetch Observatorium")
 		return ctrl.Result{}, ctrl_client.IgnoreNotFound(err)
 	}
 
@@ -57,10 +58,12 @@ func (r *ObservatoriumReconciler) Reconcile(req ctrl.Request) (ctrl.Result, erro
 		r.Client,
 		[]*tasks.TaskSpec{
 			tasks.NewTaskSpec("Updating Thanos Querier", tasks.NewThanosQuerierTask(r.Client, factory, true)),
+			tasks.NewTaskSpec("Updating Thanos Compactor", tasks.NewThanosCompactorTask(r.Client, factory)),
+			tasks.NewTaskSpec("Updating Thanos Store", tasks.NewThanosStoreTask(r.Client, factory)),
 		},
 	)
 
-	_, err := tl.RunAll()
+	taskName, err := tl.RunAll()
 	if err != nil {
 		// klog.Infof("Updating ClusterOperator status to failed. Err: %v", err)
 		// failedTaskReason := strings.Join(strings.Fields(taskName+"Failed"), "")
@@ -68,9 +71,11 @@ func (r *ObservatoriumReconciler) Reconcile(req ctrl.Request) (ctrl.Result, erro
 		// if reportErr != nil {
 		// 	klog.Errorf("error occurred while setting status to failed: %v", reportErr)
 		// }
-		r.Log.Error(err, "FAILED!!!!")
+		log.Info("Finish Reconcile Failed")
+		r.Log.Error(err, taskName)
 		return ctrl.Result{}, err
 	}
+	log.Info("Finish Reconcile Success")
 	return ctrl.Result{}, nil
 }
 
