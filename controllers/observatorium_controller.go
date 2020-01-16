@@ -19,29 +19,58 @@ import (
 	"context"
 
 	"github.com/go-logr/logr"
+	"github.com/nmagnezi/observatorium-operator/client"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	ctrl_client "sigs.k8s.io/controller-runtime/pkg/client"
 
-	observatoriumv1alpha1 "github.com/observatorium-operator/api/v1alpha1"
+	observatoriumv1alpha1 "github.com/nmagnezi/observatorium-operator/api/v1alpha1"
+	"github.com/nmagnezi/observatorium-operator/manifests"
+	"github.com/nmagnezi/observatorium-operator/tasks"
 )
+
+// "sigs.k8s.io/controller-runtime/pkg/client"
 
 // ObservatoriumReconciler reconciles a Observatorium object
 type ObservatoriumReconciler struct {
-	client.Client
-	Log    logr.Logger
-	Scheme *runtime.Scheme
+	Client    *client.Client
+	CrdClient ctrl_client.Client
+	Log       logr.Logger
+	Scheme    *runtime.Scheme
 }
 
 // +kubebuilder:rbac:groups=observatorium.observatorium,resources=observatoria,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=observatorium.observatorium,resources=observatoria/status,verbs=get;update;patch
 
 func (r *ObservatoriumReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	_ = context.Background()
+	ctx := context.Background()
 	_ = r.Log.WithValues("observatorium", req.NamespacedName)
 
-	// your logic here
+	var observatorium observatoriumv1alpha1.Observatorium
+	if err := r.CrdClient.Get(ctx, req.NamespacedName, &observatorium); err != nil {
+		r.Log.Error(err, "unable to fetch Observatorium")
+		return ctrl.Result{}, ctrl_client.IgnoreNotFound(err)
+	}
 
+	factory := manifests.NewFactory(req.NamespacedName.Namespace, "r.namespaceUserWorkload123", observatorium)
+	tl := tasks.NewTaskRunner(
+		r.Client,
+		[]*tasks.TaskSpec{
+			tasks.NewTaskSpec("Updating Thanos Querier", tasks.NewThanosQuerierTask(r.Client, factory, true)),
+		},
+	)
+
+	_, err := tl.RunAll()
+	if err != nil {
+		// klog.Infof("Updating ClusterOperator status to failed. Err: %v", err)
+		// failedTaskReason := strings.Join(strings.Fields(taskName+"Failed"), "")
+		// reportErr := r.client.StatusReporter().SetFailed(err, failedTaskReason)
+		// if reportErr != nil {
+		// 	klog.Errorf("error occurred while setting status to failed: %v", reportErr)
+		// }
+		r.Log.Error(err, "FAILED!!!!")
+		return ctrl.Result{}, err
+	}
 	return ctrl.Result{}, nil
 }
 
