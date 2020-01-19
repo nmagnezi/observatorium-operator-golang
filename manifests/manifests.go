@@ -24,7 +24,11 @@ import (
 )
 
 var (
-	ThanosQuerierDeployment = "assets/thanos-querier-deployment.yaml"
+	ThanosQuerierDeployment    = "assets/thanos-querier-deployment.yaml"
+	ThanosCompactorStatefulSet = "assets/thanos-compactor-statefulSet.yaml"
+	ThanosCompactorService     = "assets/thanos-compactor-service.yaml"
+	ThanosStoreStatefulSet     = "assets/thanos-store-statefulSet.yaml"
+	ThanosStoreService         = "assets/thanos-store-service.yaml"
 )
 
 func MustAssetReader(asset string) io.Reader {
@@ -64,6 +68,32 @@ func (f *Factory) NewDeployment(manifest io.Reader) (*appsv1.Deployment, error) 
 	}
 
 	return d, nil
+}
+
+func (f *Factory) NewService(manifest io.Reader) (*v1.Service, error) {
+	s, err := NewService(manifest)
+	if err != nil {
+		return nil, err
+	}
+
+	if s.GetNamespace() == "" {
+		s.SetNamespace(f.namespace)
+	}
+
+	return s, nil
+}
+
+func (f *Factory) NewStatefulSet(manifest io.Reader) (*appsv1.StatefulSet, error) {
+	s, err := NewStatefulSet(manifest)
+	if err != nil {
+		return nil, err
+	}
+
+	if s.GetNamespace() == "" {
+		s.SetNamespace(f.namespace)
+	}
+
+	return s, nil
 }
 
 func (f *Factory) ThanosQuerierDeployment(grpcTLS *v1.Secret, enableUserWorkloadMonitoring bool, trustedCA *v1.ConfigMap) (*appsv1.Deployment, error) {
@@ -129,6 +159,52 @@ func (f *Factory) ThanosQuerierDeployment(grpcTLS *v1.Secret, enableUserWorkload
 	// 	})
 	// 	d.Spec.Template.Spec.Volumes = append(d.Spec.Template.Spec.Volumes, volume)
 	// }
+
+	return d, nil
+}
+
+func (f *Factory) ThanosCompactorService() (*v1.Service, error) {
+	s, err := f.NewService(MustAssetReader(ThanosCompactorService))
+	if err != nil {
+		return nil, err
+	}
+
+	s.Namespace = f.namespace
+
+	return s, nil
+}
+
+func (f *Factory) ThanosCompactorStatefulSet() (*appsv1.StatefulSet, error) {
+	d, err := f.NewStatefulSet(MustAssetReader(ThanosCompactorStatefulSet))
+	if err != nil {
+		return nil, err
+	}
+
+	d.Namespace = f.namespace
+	d.Spec.Replicas = f.crd.Spec.Thanos.Compactor.Replicas
+
+	return d, nil
+}
+
+func (f *Factory) ThanosStoreService() (*v1.Service, error) {
+	s, err := f.NewService(MustAssetReader(ThanosStoreService))
+	if err != nil {
+		return nil, err
+	}
+
+	s.Namespace = f.namespace
+
+	return s, nil
+}
+
+func (f *Factory) ThanosStoreStatefulSet() (*appsv1.StatefulSet, error) {
+	d, err := f.NewStatefulSet(MustAssetReader(ThanosStoreStatefulSet))
+	if err != nil {
+		return nil, err
+	}
+
+	d.Namespace = f.namespace
+	d.Spec.Replicas = f.crd.Spec.Thanos.Store.Replicas
 
 	return d, nil
 }
@@ -320,6 +396,16 @@ func NewDeployment(manifest io.Reader) (*appsv1.Deployment, error) {
 	}
 
 	return &d, nil
+}
+
+func NewStatefulSet(manifest io.Reader) (*appsv1.StatefulSet, error) {
+	s := appsv1.StatefulSet{}
+	err := yaml.NewYAMLOrJSONDecoder(manifest, 100).Decode(&s)
+	if err != nil {
+		return nil, err
+	}
+
+	return &s, nil
 }
 
 func NewIngress(manifest io.Reader) (*v1beta1.Ingress, error) {

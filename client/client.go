@@ -589,7 +589,45 @@ func (c *Client) WaitForDeploymentRollout(dep *appsv1.Deployment) error {
 	return nil
 }
 
-func (c *Client) WaitForStatefulsetRollout(sts *appsv1.StatefulSet) error {
+func (c *Client) CreateOrUpdateStatefulSet(sts *appsv1.StatefulSet) error {
+	s, err := c.kclient.AppsV1().StatefulSets(sts.GetNamespace()).Get(sts.GetName(), metav1.GetOptions{})
+
+	if apierrors.IsNotFound(err) {
+		err = c.CreateStatefulSet(sts)
+		return errors.Wrap(err, "creating statefulSet object failed")
+	}
+	if err != nil {
+		return errors.Wrap(err, "retrieving statefulSet object failed")
+	}
+	if reflect.DeepEqual(sts.Spec, s.Spec) {
+		// Nothing to do, as the currently existing statefulSet
+		// is equivalent to the one that would be applied.
+		return nil
+	}
+
+	err = c.UpdateStatefulSet(sts)
+	return errors.Wrap(err, "updating statefulSet object failed")
+}
+
+func (c *Client) CreateStatefulSet(sts *appsv1.StatefulSet) error {
+	s, err := c.kclient.AppsV1().StatefulSets(sts.GetNamespace()).Create(sts)
+	if err != nil {
+		return err
+	}
+
+	return c.WaitForStatefulSetRollout(s)
+}
+
+func (c *Client) UpdateStatefulSet(sts *appsv1.StatefulSet) error {
+	updated, err := c.kclient.AppsV1().StatefulSets(sts.GetNamespace()).Update(sts)
+	if err != nil {
+		return err
+	}
+
+	return c.WaitForStatefulSetRollout(updated)
+}
+
+func (c *Client) WaitForStatefulSetRollout(sts *appsv1.StatefulSet) error {
 	var lastErr error
 	if err := wait.Poll(time.Second, deploymentCreateTimeout, func() (bool, error) {
 		d, err := c.kclient.AppsV1().StatefulSets(sts.GetNamespace()).Get(sts.GetName(), metav1.GetOptions{})
