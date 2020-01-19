@@ -35,6 +35,17 @@ func NewThanosQuerierTask(client *client.Client, factory *manifests.Factory, cfg
 }
 
 func (t *ThanosQuerierTask) Run() error {
+
+	svc, err := t.factory.ThanosQuerierService()
+	if err != nil {
+		return errors.Wrap(err, "initializing Thanos Querier Service failed")
+	}
+
+	err = t.client.CreateOrUpdateService(svc)
+	if err != nil {
+		return errors.Wrap(err, "reconciling Thanos Querier Service failed")
+	}
+
 	dep, err := t.factory.ThanosQuerierDeployment(nil, t.userWorkloadConfig, nil)
 	if err != nil {
 		return errors.Wrap(err, "initializing Thanos Querier Deployment failed")
