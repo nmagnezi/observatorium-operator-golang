@@ -18,6 +18,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/api/extensions/v1beta1"
 	rbacv1 "k8s.io/api/rbac/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/yaml"
 	apiregistrationv1beta1 "k8s.io/kube-aggregator/pkg/apis/apiregistration/v1beta1"
@@ -194,6 +195,10 @@ func (f *Factory) ThanosCompactorStatefulSet() (*appsv1.StatefulSet, error) {
 
 	d.Namespace = f.namespace
 	d.Spec.Replicas = f.crd.Spec.Thanos.Compactor.Replicas
+	d.Spec.Template.Spec.Containers[0].Resources.Limits[v1.ResourceCPU] = f.crd.Spec.Thanos.Compactor.Resources.Limits[v1.ResourceCPU]
+	d.Spec.Template.Spec.Containers[0].Resources.Limits[v1.ResourceMemory] = f.crd.Spec.Thanos.Compactor.Resources.Limits[v1.ResourceMemory]
+	d.Spec.Template.Spec.Containers[0].Resources.Requests[v1.ResourceCPU] = f.crd.Spec.Thanos.Compactor.Resources.Requests[v1.ResourceCPU]
+	d.Spec.Template.Spec.Containers[0].Resources.Requests[v1.ResourceMemory] = f.crd.Spec.Thanos.Compactor.Resources.Requests[v1.ResourceMemory]
 
 	return d, nil
 }
@@ -217,7 +222,12 @@ func (f *Factory) ThanosStoreStatefulSet() (*appsv1.StatefulSet, error) {
 
 	d.Namespace = f.namespace
 	d.Spec.Replicas = f.crd.Spec.Thanos.Store.Replicas
-
+	d.Spec.Template.Spec.Containers[0].Resources.Limits[v1.ResourceCPU] = f.crd.Spec.Thanos.Store.Resources.Limits[v1.ResourceCPU]
+	d.Spec.Template.Spec.Containers[0].Resources.Limits[v1.ResourceMemory] = f.crd.Spec.Thanos.Store.Resources.Limits[v1.ResourceMemory]
+	d.Spec.Template.Spec.Containers[0].Resources.Requests[v1.ResourceCPU] = f.crd.Spec.Thanos.Store.Resources.Requests[v1.ResourceCPU]
+	d.Spec.Template.Spec.Containers[0].Resources.Requests[v1.ResourceMemory] = f.crd.Spec.Thanos.Store.Resources.Requests[v1.ResourceMemory]
+	d.Spec.VolumeClaimTemplates[0].Spec.StorageClassName = f.crd.Spec.Thanos.Store.StorageClass
+	d.Spec.VolumeClaimTemplates[0].Spec.Resources.Requests[v1.ResourceStorage] = resource.MustParse(*f.crd.Spec.Thanos.Store.PVCSize)
 	return d, nil
 }
 
