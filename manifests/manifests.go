@@ -25,6 +25,7 @@ import (
 
 var (
 	ThanosQuerierDeployment    = "assets/thanos-querier-deployment.yaml"
+	ThanosQuerierService       = "assets/thanos-querier-service.yaml"
 	ThanosCompactorStatefulSet = "assets/thanos-compactor-statefulSet.yaml"
 	ThanosCompactorService     = "assets/thanos-compactor-service.yaml"
 	ThanosStoreStatefulSet     = "assets/thanos-store-statefulSet.yaml"
@@ -161,6 +162,17 @@ func (f *Factory) ThanosQuerierDeployment(grpcTLS *v1.Secret, enableUserWorkload
 	// }
 
 	return d, nil
+}
+
+func (f *Factory) ThanosQuerierService() (*v1.Service, error) {
+	s, err := f.NewService(MustAssetReader(ThanosQuerierService))
+	if err != nil {
+		return nil, err
+	}
+
+	s.Namespace = f.namespace
+
+	return s, nil
 }
 
 func (f *Factory) ThanosCompactorService() (*v1.Service, error) {
