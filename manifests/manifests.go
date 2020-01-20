@@ -25,17 +25,27 @@ import (
 )
 
 var (
-	ThanosQuerierDeployment      = "assets/thanos-querier-deployment.yaml"
-	ThanosQuerierService         = "assets/thanos-querier-service.yaml"
-	ThanosQuerierCacheDeployment = "assets/thanos-querier-cache-deployment.yaml"
-	ThanosQuerierCacheService    = "assets/thanos-querier-cache-service.yaml"
-	ThanosQuerierCacheConfigMap  = "assets/thanos-querier-cache-configmap.yaml"
-	ThanosCompactorStatefulSet   = "assets/thanos-compactor-statefulSet.yaml"
-	ThanosCompactorService       = "assets/thanos-compactor-service.yaml"
-	ThanosStoreStatefulSet       = "assets/thanos-store-statefulSet.yaml"
-	ThanosStoreService           = "assets/thanos-store-service.yaml"
-	ThanosRulerStatefulSet       = "assets/thanos-ruler-statefulSet.yaml"
-	ThanosRulerService           = "assets/thanos-ruler-service.yaml"
+	ThanosQuerierDeployment               = "assets/thanos-querier-deployment.yaml"
+	ThanosQuerierService                  = "assets/thanos-querier-service.yaml"
+	ThanosQuerierCacheDeployment          = "assets/thanos-querier-cache-deployment.yaml"
+	ThanosQuerierCacheService             = "assets/thanos-querier-cache-service.yaml"
+	ThanosQuerierCacheConfigMap           = "assets/thanos-querier-cache-configmap.yaml"
+	ThanosCompactorStatefulSet            = "assets/thanos-compactor-statefulSet.yaml"
+	ThanosCompactorService                = "assets/thanos-compactor-service.yaml"
+	ThanosStoreStatefulSet                = "assets/thanos-store-statefulSet.yaml"
+	ThanosStoreService                    = "assets/thanos-store-service.yaml"
+	ThanosRulerStatefulSet                = "assets/thanos-ruler-statefulSet.yaml"
+	ThanosRulerService                    = "assets/thanos-ruler-service.yaml"
+	ThanosReceiveControllerDeployment     = "assets/thanos-receive-controller-deployment.yaml"
+	ThanosReceiveControllerServiceAccount = "assets/thanos-receive-controller-serviceAccount.yaml"
+	ThanosReceiveControllerService        = "assets/thanos-receive-controller-service.yaml"
+	ThanosReceiveControllerServiceMonitor = "assets/thanos-receive-controller-serviceMonitor.yaml"
+	ThanosReceiveControllerRoleBinding    = "assets/thanos-receive-controller-roleBinding.yaml"
+	ThanosReceiveControllerRoleConfig     = "assets/thanos-receive-controller-role.yaml"
+	ThanosReceiveControllerConfigMap      = "assets/thanos-receive-controller-configmap.yaml"
+	ThanosReceiveService                  = "assets/thanos-receive-service.yaml"
+	ThanosReceiveDefaultService           = "assets/thanos-receive-service-default.yaml"
+	ThanosReceiveDefaultStatefulSet       = "assets/thanos-receive-statefulSet-default.yaml"
 )
 
 func MustAssetReader(asset string) io.Reader {
@@ -53,6 +63,32 @@ func NewFactory(namespace, namespaceUserWorkload string, c observatoriumv1alpha1
 		namespaceUserWorkload: namespaceUserWorkload,
 		crd:                   c,
 	}
+}
+
+func (f *Factory) NewRole(manifest io.Reader) (*rbacv1.Role, error) {
+	r, err := NewRole(manifest)
+	if err != nil {
+		return nil, err
+	}
+
+	if r.GetNamespace() == "" {
+		r.SetNamespace(f.namespace)
+	}
+
+	return r, nil
+}
+
+func (f *Factory) NewServiceMonitor(manifest io.Reader) (*monv1.ServiceMonitor, error) {
+	sm, err := NewServiceMonitor(manifest)
+	if err != nil {
+		return nil, err
+	}
+
+	if sm.GetNamespace() == "" {
+		sm.SetNamespace(f.namespace)
+	}
+
+	return sm, nil
 }
 
 func (f *Factory) NewDeployment(manifest io.Reader) (*appsv1.Deployment, error) {
@@ -79,6 +115,32 @@ func (f *Factory) NewService(manifest io.Reader) (*v1.Service, error) {
 	}
 
 	return s, nil
+}
+
+func (f *Factory) NewRoleBinding(manifest io.Reader) (*rbacv1.RoleBinding, error) {
+	rb, err := NewRoleBinding(manifest)
+	if err != nil {
+		return nil, err
+	}
+
+	if rb.GetNamespace() == "" {
+		rb.SetNamespace(f.namespace)
+	}
+
+	return rb, nil
+}
+
+func (f *Factory) NewServiceAccount(manifest io.Reader) (*v1.ServiceAccount, error) {
+	sa, err := NewServiceAccount(manifest)
+	if err != nil {
+		return nil, err
+	}
+
+	if sa.GetNamespace() == "" {
+		sa.SetNamespace(f.namespace)
+	}
+
+	return sa, nil
 }
 
 func (f *Factory) NewStatefulSet(manifest io.Reader) (*appsv1.StatefulSet, error) {
@@ -161,6 +223,116 @@ func (f *Factory) ThanosQuerierService() (*v1.Service, error) {
 	s.Namespace = f.namespace
 
 	return s, nil
+}
+
+func (f *Factory) ThanosReceiveControllerRoleConfig() (*rbacv1.Role, error) {
+	r, err := f.NewRole(MustAssetReader(ThanosReceiveControllerRoleConfig))
+	if err != nil {
+		return nil, err
+	}
+
+	r.Namespace = f.namespace
+
+	return r, nil
+}
+
+func (f *Factory) ThanosReceiveControllerServiceMonitor() (*monv1.ServiceMonitor, error) {
+	sm, err := f.NewServiceMonitor(MustAssetReader(ThanosReceiveControllerServiceMonitor))
+	if err != nil {
+		return nil, err
+	}
+
+	sm.Namespace = f.namespace
+	return sm, nil
+}
+
+func (f *Factory) ThanosReceiveControllerDeployment() (*appsv1.Deployment, error) {
+	d, err := f.NewDeployment(MustAssetReader(ThanosReceiveControllerDeployment))
+	if err != nil {
+		return nil, err
+	}
+
+	d.Namespace = f.namespace
+	d.Spec.Replicas = f.crd.Spec.Thanos.ReceiveControllerSpec.Replicas
+	return d, nil
+}
+
+func (f *Factory) ThanosReceiveControllerRoleBinding() (*rbacv1.RoleBinding, error) {
+	rb, err := f.NewRoleBinding(MustAssetReader(ThanosReceiveControllerRoleBinding))
+	if err != nil {
+		return nil, err
+	}
+
+	rb.Namespace = f.namespace
+	rb.Subjects[0].Namespace = f.namespace
+
+	return rb, nil
+}
+
+func (f *Factory) ThanosReceiveControllerServiceAccount() (*v1.ServiceAccount, error) {
+	s, err := f.NewServiceAccount(MustAssetReader(ThanosReceiveControllerServiceAccount))
+	if err != nil {
+		return nil, err
+	}
+
+	s.Namespace = f.namespace
+
+	return s, nil
+}
+
+func (f *Factory) ThanosReceiveControllerService() (*v1.Service, error) {
+	s, err := f.NewService(MustAssetReader(ThanosReceiveControllerService))
+	if err != nil {
+		return nil, err
+	}
+
+	s.Namespace = f.namespace
+
+	return s, nil
+}
+
+func (f *Factory) ThanosReceiveDefaultStatefulSet() (*appsv1.StatefulSet, error) {
+	d, err := f.NewStatefulSet(MustAssetReader(ThanosReceiveDefaultStatefulSet))
+	if err != nil {
+		return nil, err
+	}
+
+	d.Namespace = f.namespace
+
+	return d, nil
+}
+
+func (f *Factory) ThanosReceiveDefaultService() (*v1.Service, error) {
+	s, err := f.NewService(MustAssetReader(ThanosReceiveDefaultService))
+	if err != nil {
+		return nil, err
+	}
+
+	s.Namespace = f.namespace
+
+	return s, nil
+}
+
+func (f *Factory) ThanosReceiveService() (*v1.Service, error) {
+	s, err := f.NewService(MustAssetReader(ThanosReceiveService))
+	if err != nil {
+		return nil, err
+	}
+
+	s.Namespace = f.namespace
+
+	return s, nil
+}
+
+func (f *Factory) ThanosReceiveControllerConfigMap() (*v1.ConfigMap, error) {
+	c, err := f.NewConfigMap(MustAssetReader(ThanosReceiveControllerConfigMap))
+	if err != nil {
+		return nil, err
+	}
+
+	c.Namespace = f.namespace
+
+	return c, nil
 }
 
 func (f *Factory) ThanosCompactorService() (*v1.Service, error) {
@@ -287,26 +459,6 @@ func NewSecret(manifest io.Reader) (*v1.Secret, error) {
 		return nil, err
 	}
 	return &s, nil
-}
-
-func NewClusterRoleBinding(manifest io.Reader) (*rbacv1.ClusterRoleBinding, error) {
-	crb := rbacv1.ClusterRoleBinding{}
-	err := yaml.NewYAMLOrJSONDecoder(manifest, 100).Decode(&crb)
-	if err != nil {
-		return nil, err
-	}
-
-	return &crb, nil
-}
-
-func NewClusterRole(manifest io.Reader) (*rbacv1.ClusterRole, error) {
-	cr := rbacv1.ClusterRole{}
-	err := yaml.NewYAMLOrJSONDecoder(manifest, 100).Decode(&cr)
-	if err != nil {
-		return nil, err
-	}
-
-	return &cr, nil
 }
 
 func NewRoleBinding(manifest io.Reader) (*rbacv1.RoleBinding, error) {
