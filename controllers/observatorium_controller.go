@@ -61,6 +61,7 @@ func (r *ObservatoriumReconciler) Reconcile(req ctrl.Request) (ctrl.Result, erro
 			tasks.NewTaskSpec("Updating Thanos Querier Cache", tasks.NewThanosQuerierCacheTask(r.Client, factory)),
 			tasks.NewTaskSpec("Updating Thanos Compactor", tasks.NewThanosCompactorTask(r.Client, factory)),
 			tasks.NewTaskSpec("Updating Thanos Store", tasks.NewThanosStoreTask(r.Client, factory)),
+			tasks.NewTaskSpec("Updating Thanos Ruler", tasks.NewThanosRulerTask(r.Client, factory)),
 		},
 	)
 

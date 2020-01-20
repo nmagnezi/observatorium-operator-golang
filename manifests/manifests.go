@@ -34,6 +34,8 @@ var (
 	ThanosCompactorService       = "assets/thanos-compactor-service.yaml"
 	ThanosStoreStatefulSet       = "assets/thanos-store-statefulSet.yaml"
 	ThanosStoreService           = "assets/thanos-store-service.yaml"
+	ThanosRulerStatefulSet       = "assets/thanos-ruler-statefulSet.yaml"
+	ThanosRulerService           = "assets/thanos-ruler-service.yaml"
 )
 
 func MustAssetReader(asset string) io.Reader {
@@ -184,6 +186,28 @@ func (f *Factory) ThanosCompactorStatefulSet() (*appsv1.StatefulSet, error) {
 	d.Spec.Template.Spec.Containers[0].Resources.Limits[v1.ResourceMemory] = f.crd.Spec.Thanos.Compactor.Resources.Limits[v1.ResourceMemory]
 	d.Spec.Template.Spec.Containers[0].Resources.Requests[v1.ResourceCPU] = f.crd.Spec.Thanos.Compactor.Resources.Requests[v1.ResourceCPU]
 	d.Spec.Template.Spec.Containers[0].Resources.Requests[v1.ResourceMemory] = f.crd.Spec.Thanos.Compactor.Resources.Requests[v1.ResourceMemory]
+
+	return d, nil
+}
+
+func (f *Factory) ThanosRulerService() (*v1.Service, error) {
+	s, err := f.NewService(MustAssetReader(ThanosRulerService))
+	if err != nil {
+		return nil, err
+	}
+
+	s.Namespace = f.namespace
+
+	return s, nil
+}
+
+func (f *Factory) ThanosRulerStatefulSet() (*appsv1.StatefulSet, error) {
+	d, err := f.NewStatefulSet(MustAssetReader(ThanosRulerStatefulSet))
+	if err != nil {
+		return nil, err
+	}
+
+	d.Namespace = f.namespace
 
 	return d, nil
 }
