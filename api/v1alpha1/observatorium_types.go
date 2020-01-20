@@ -91,7 +91,8 @@ type ThanosSpec struct {
 	Store ThanosPersistentSpec `json:"store"`
 	// Thanos CompactorSpec
 	Compactor ThanosComponentSpec `json:"compactor"`
-
+	// Thanos RulerSpec
+	Ruler ThanosComponentSpec `json:"ruler"`
 	// Object Store Config Secret for Thanos
 	ObjectStoreConfigSecret *string `json:"objectStoreConfigSecret"`
 	// TODO: AWS secrets?
