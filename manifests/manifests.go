@@ -25,12 +25,15 @@ import (
 )
 
 var (
-	ThanosQuerierDeployment    = "assets/thanos-querier-deployment.yaml"
-	ThanosQuerierService       = "assets/thanos-querier-service.yaml"
-	ThanosCompactorStatefulSet = "assets/thanos-compactor-statefulSet.yaml"
-	ThanosCompactorService     = "assets/thanos-compactor-service.yaml"
-	ThanosStoreStatefulSet     = "assets/thanos-store-statefulSet.yaml"
-	ThanosStoreService         = "assets/thanos-store-service.yaml"
+	ThanosQuerierDeployment      = "assets/thanos-querier-deployment.yaml"
+	ThanosQuerierService         = "assets/thanos-querier-service.yaml"
+	ThanosQuerierCacheDeployment = "assets/thanos-querier-cache-deployment.yaml"
+	ThanosQuerierCacheService    = "assets/thanos-querier-cache-service.yaml"
+	ThanosQuerierCacheConfigMap  = "assets/thanos-querier-cache-configmap.yaml"
+	ThanosCompactorStatefulSet   = "assets/thanos-compactor-statefulSet.yaml"
+	ThanosCompactorService       = "assets/thanos-compactor-service.yaml"
+	ThanosStoreStatefulSet       = "assets/thanos-store-statefulSet.yaml"
+	ThanosStoreService           = "assets/thanos-store-service.yaml"
 )
 
 func MustAssetReader(asset string) io.Reader {
@@ -49,15 +52,6 @@ func NewFactory(namespace, namespaceUserWorkload string, c observatoriumv1alpha1
 		crd:                   c,
 	}
 }
-
-const (
-	// These constants refer to indices of prometheus-k8s containers.
-	// They need to be in sync with jsonnet/prometheus.jsonnet
-	THANOS_QUERIER_CONTAINER_THANOS           = 0
-	THANOS_QUERIER_CONTAINER_OAUTH_PROXY      = 1
-	THANOS_QUERIER_CONTAINER_KUBE_RBAC_PROXY  = 2
-	THANOS_QUERIER_CONTAINER_PROM_LABEL_PROXY = 3
-)
 
 func (f *Factory) NewDeployment(manifest io.Reader) (*appsv1.Deployment, error) {
 	d, err := NewDeployment(manifest)
@@ -98,6 +92,19 @@ func (f *Factory) NewStatefulSet(manifest io.Reader) (*appsv1.StatefulSet, error
 	return s, nil
 }
 
+func (f *Factory) NewConfigMap(manifest io.Reader) (*v1.ConfigMap, error) {
+	cm, err := NewConfigMap(manifest)
+	if err != nil {
+		return nil, err
+	}
+
+	if cm.GetNamespace() == "" {
+		cm.SetNamespace(f.namespace)
+	}
+
+	return cm, nil
+}
+
 func (f *Factory) ThanosQuerierDeployment(grpcTLS *v1.Secret, enableUserWorkloadMonitoring bool, trustedCA *v1.ConfigMap) (*appsv1.Deployment, error) {
 	d, err := f.NewDeployment(MustAssetReader(ThanosQuerierDeployment))
 	if err != nil {
@@ -107,62 +114,40 @@ func (f *Factory) ThanosQuerierDeployment(grpcTLS *v1.Secret, enableUserWorkload
 	d.Namespace = f.namespace
 	d.Spec.Replicas = f.crd.Spec.Thanos.Querier.Replicas
 
-	// setEnv := func(name, value string) {
-	// 	for i := range d.Spec.Template.Spec.Containers[THANOS_QUERIER_CONTAINER_OAUTH_PROXY].Env {
-	// 		if d.Spec.Template.Spec.Containers[THANOS_QUERIER_CONTAINER_OAUTH_PROXY].Env[i].Name == name {
-	// 			d.Spec.Template.Spec.Containers[THANOS_QUERIER_CONTAINER_OAUTH_PROXY].Env[i].Value = value
-	// 			break
-	// 		}
-	// 	}
-	// }
-
-	// if f.config.HTTPConfig.HTTPProxy != "" {
-	// 	setEnv("HTTP_PROXY", f.config.HTTPConfig.HTTPProxy)
-	// }
-	// if f.config.HTTPConfig.HTTPSProxy != "" {
-	// 	setEnv("HTTPS_PROXY", f.config.HTTPConfig.HTTPSProxy)
-	// }
-	// if f.config.HTTPConfig.NoProxy != "" {
-	// 	setEnv("NO_PROXY", f.config.HTTPConfig.NoProxy)
-	// }
-
-	// d.Spec.Template.Spec.Containers[THANOS_QUERIER_CONTAINER_THANOS].Image = f.config.Images.Thanos
-	// d.Spec.Template.Spec.Containers[THANOS_QUERIER_CONTAINER_OAUTH_PROXY].Image = f.config.Images.OauthProxy
-	// d.Spec.Template.Spec.Containers[THANOS_QUERIER_CONTAINER_KUBE_RBAC_PROXY].Image = f.config.Images.KubeRbacProxy
-	// d.Spec.Template.Spec.Containers[THANOS_QUERIER_CONTAINER_PROM_LABEL_PROXY].Image = f.config.Images.PromLabelProxy
-
-	// if enableUserWorkloadMonitoring {
-	// 	d.Spec.Template.Spec.Containers[THANOS_QUERIER_CONTAINER_THANOS].Args = append(
-	// 		d.Spec.Template.Spec.Containers[THANOS_QUERIER_CONTAINER_THANOS].Args,
-	// 		"--store=dnssrv+_grpc._tcp.prometheus-operated.openshift-user-workload-monitoring.svc.cluster.local",
-	// 	)
-	// }
-
-	// d.Spec.Template.Spec.Volumes = append(d.Spec.Template.Spec.Volumes, v1.Volume{
-	// 	Name: "secret-grpc-tls",
-	// 	VolumeSource: v1.VolumeSource{
-	// 		Secret: &v1.SecretVolumeSource{
-	// 			SecretName: grpcTLS.GetName(),
-	// 		},
-	// 	},
-	// })
-
-	// if trustedCA != nil {
-	// 	volumeName := "thanos-querier-trusted-ca-bundle"
-	// 	d.Spec.Template.Spec.Containers[THANOS_QUERIER_CONTAINER_OAUTH_PROXY].VolumeMounts = append(
-	// 		d.Spec.Template.Spec.Containers[THANOS_QUERIER_CONTAINER_OAUTH_PROXY].VolumeMounts,
-	// 		trustedCABundleVolumeMount(volumeName),
-	// 	)
-
-	// 	volume := trustedCABundleVolume(trustedCA.Name, volumeName)
-	// 	volume.VolumeSource.ConfigMap.Items = append(volume.VolumeSource.ConfigMap.Items, v1.KeyToPath{
-	// 		Key:  "ca-bundle.crt",
-	// 		Path: "tls-ca-bundle.pem",
-	// 	})
-	// 	d.Spec.Template.Spec.Volumes = append(d.Spec.Template.Spec.Volumes, volume)
-	// }
-
 	return d, nil
+}
+
+func (f *Factory) ThanosQuerierCacheDeployment() (*appsv1.Deployment, error) {
+	d, err := f.NewDeployment(MustAssetReader(ThanosQuerierCacheDeployment))
+	if err != nil {
+		return nil, err
+	}
+
+	d.Namespace = f.namespace
+	d.Spec.Replicas = f.crd.Spec.Thanos.QuerierCache.Replicas
+	return d, nil
+}
+
+func (f *Factory) ThanosQuerierCacheService() (*v1.Service, error) {
+	s, err := f.NewService(MustAssetReader(ThanosQuerierCacheService))
+	if err != nil {
+		return nil, err
+	}
+
+	s.Namespace = f.namespace
+
+	return s, nil
+}
+
+func (f *Factory) ThanosQuerierCacheConfigMap() (*v1.ConfigMap, error) {
+	c, err := f.NewConfigMap(MustAssetReader(ThanosQuerierCacheConfigMap))
+	if err != nil {
+		return nil, err
+	}
+
+	c.Namespace = f.namespace
+
+	return c, nil
 }
 
 func (f *Factory) ThanosQuerierService() (*v1.Service, error) {
