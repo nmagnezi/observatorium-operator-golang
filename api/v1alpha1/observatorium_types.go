@@ -71,7 +71,6 @@ type Hashring struct {
 	Name *string `json:"name"`
 	// Tenants describes a lists of tenants.
 	Tenants []*string `json:"tenants,omitempty"`
-	//
 }
 
 type ThanosSpec struct {

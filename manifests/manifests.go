@@ -174,10 +174,20 @@ func (f *Factory) ThanosQuerierDeployment(grpcTLS *v1.Secret, enableUserWorkload
 	if err != nil {
 		return nil, err
 	}
-
 	d.Namespace = f.namespace
+	//TODO(nmagnezi): thanos-querier
+	// metadata: labels, name, namespace
+	// spec: selector, template.metadata, template.spec.affinity, template.spec.containers[...] missing args, image, livenessProbe, name, ports, env, readinessProbe and terminationGracePeriodSeconds
 	d.Spec.Replicas = f.crd.Spec.Thanos.Querier.Replicas
-
+	d.Spec.Template.Spec.Containers[0].Resources.Limits[v1.ResourceCPU] = f.crd.Spec.Thanos.Querier.Resources.Limits[v1.ResourceCPU]
+	d.Spec.Template.Spec.Containers[0].Resources.Limits[v1.ResourceMemory] = f.crd.Spec.Thanos.Querier.Resources.Limits[v1.ResourceMemory]
+	d.Spec.Template.Spec.Containers[0].Resources.Requests[v1.ResourceCPU] = f.crd.Spec.Thanos.Querier.Resources.Requests[v1.ResourceCPU]
+	d.Spec.Template.Spec.Containers[0].Resources.Requests[v1.ResourceMemory] = f.crd.Spec.Thanos.Querier.Resources.Requests[v1.ResourceMemory]
+	//TODO (nmagnezi): jaeger-agent, should have it's own Resources?
+	d.Spec.Template.Spec.Containers[1].Resources.Limits[v1.ResourceCPU] = f.crd.Spec.Thanos.Querier.Resources.Limits[v1.ResourceCPU]
+	d.Spec.Template.Spec.Containers[1].Resources.Limits[v1.ResourceMemory] = f.crd.Spec.Thanos.Querier.Resources.Limits[v1.ResourceMemory]
+	d.Spec.Template.Spec.Containers[1].Resources.Requests[v1.ResourceCPU] = f.crd.Spec.Thanos.Querier.Resources.Requests[v1.ResourceCPU]
+	d.Spec.Template.Spec.Containers[1].Resources.Requests[v1.ResourceMemory] = f.crd.Spec.Thanos.Querier.Resources.Requests[v1.ResourceMemory]
 	return d, nil
 }
 
@@ -186,9 +196,15 @@ func (f *Factory) ThanosQuerierCacheDeployment() (*appsv1.Deployment, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	//TODO(nmagnezi): thanos-querier missing fields: args, ports image, volumes and more
 	d.Namespace = f.namespace
 	d.Spec.Replicas = f.crd.Spec.Thanos.QuerierCache.Replicas
+
+	d.Spec.Replicas = f.crd.Spec.Thanos.Querier.Replicas
+	d.Spec.Template.Spec.Containers[0].Resources.Limits[v1.ResourceCPU] = f.crd.Spec.Thanos.QuerierCache.Resources.Limits[v1.ResourceCPU]
+	d.Spec.Template.Spec.Containers[0].Resources.Limits[v1.ResourceMemory] = f.crd.Spec.Thanos.QuerierCache.Resources.Limits[v1.ResourceMemory]
+	d.Spec.Template.Spec.Containers[0].Resources.Requests[v1.ResourceCPU] = f.crd.Spec.Thanos.QuerierCache.Resources.Requests[v1.ResourceCPU]
+	d.Spec.Template.Spec.Containers[0].Resources.Requests[v1.ResourceMemory] = f.crd.Spec.Thanos.QuerierCache.Resources.Requests[v1.ResourceMemory]
 	return d, nil
 }
 
@@ -197,7 +213,6 @@ func (f *Factory) ThanosQuerierCacheService() (*v1.Service, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	s.Namespace = f.namespace
 
 	return s, nil
@@ -380,7 +395,12 @@ func (f *Factory) ThanosRulerStatefulSet() (*appsv1.StatefulSet, error) {
 	}
 
 	d.Namespace = f.namespace
-
+	//TODO (nmagnezi): volumes args and more
+	d.Spec.Replicas = f.crd.Spec.Thanos.Store.Replicas
+	d.Spec.Template.Spec.Containers[0].Resources.Limits[v1.ResourceCPU] = f.crd.Spec.Thanos.Ruler.Resources.Limits[v1.ResourceCPU]
+	d.Spec.Template.Spec.Containers[0].Resources.Limits[v1.ResourceMemory] = f.crd.Spec.Thanos.Ruler.Resources.Limits[v1.ResourceMemory]
+	d.Spec.Template.Spec.Containers[0].Resources.Requests[v1.ResourceCPU] = f.crd.Spec.Thanos.Ruler.Resources.Requests[v1.ResourceCPU]
+	d.Spec.Template.Spec.Containers[0].Resources.Requests[v1.ResourceMemory] = f.crd.Spec.Thanos.Ruler.Resources.Requests[v1.ResourceMemory]
 	return d, nil
 }
 
