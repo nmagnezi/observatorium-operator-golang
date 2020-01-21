@@ -23,14 +23,12 @@ import (
 type ThanosQuerierTask struct {
 	client             *client.Client
 	factory            *manifests.Factory
-	userWorkloadConfig bool
 }
 
-func NewThanosQuerierTask(client *client.Client, factory *manifests.Factory, cfg bool) *ThanosQuerierTask {
+func NewThanosQuerierTask(client *client.Client, factory *manifests.Factory) *ThanosQuerierTask {
 	return &ThanosQuerierTask{
-		client:             client,
-		factory:            factory,
-		userWorkloadConfig: cfg,
+		client:  client,
+		factory: factory,
 	}
 }
 
@@ -46,7 +44,7 @@ func (t *ThanosQuerierTask) Run() error {
 		return errors.Wrap(err, "reconciling Thanos Querier Service failed")
 	}
 
-	dep, err := t.factory.ThanosQuerierDeployment(nil, t.userWorkloadConfig, nil)
+	dep, err := t.factory.ThanosQuerierDeployment()
 	if err != nil {
 		return errors.Wrap(err, "initializing Thanos Querier Deployment failed")
 	}

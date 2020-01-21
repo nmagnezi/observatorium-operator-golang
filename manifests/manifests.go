@@ -169,7 +169,7 @@ func (f *Factory) NewConfigMap(manifest io.Reader) (*v1.ConfigMap, error) {
 	return cm, nil
 }
 
-func (f *Factory) ThanosQuerierDeployment(grpcTLS *v1.Secret, enableUserWorkloadMonitoring bool, trustedCA *v1.ConfigMap) (*appsv1.Deployment, error) {
+func (f *Factory) ThanosQuerierDeployment() (*appsv1.Deployment, error) {
 	d, err := f.NewDeployment(MustAssetReader(ThanosQuerierDeployment))
 	if err != nil {
 		return nil, err
