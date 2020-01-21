@@ -875,7 +875,7 @@ func (c *Client) CreateOrUpdateService(svc *v1.Service) error {
 	}
 
 	svc.ResourceVersion = s.ResourceVersion
-	if svc.Spec.Type == v1.ServiceTypeClusterIP {
+	if svc.Spec.Type == "" || svc.Spec.Type == v1.ServiceTypeClusterIP {
 		svc.Spec.ClusterIP = s.Spec.ClusterIP
 	}
 
