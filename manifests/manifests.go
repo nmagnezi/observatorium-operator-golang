@@ -200,11 +200,11 @@ func (f *Factory) ThanosQuerierCacheDeployment() (*appsv1.Deployment, error) {
 	d.Namespace = f.namespace
 	d.Spec.Replicas = f.crd.Spec.Thanos.QuerierCache.Replicas
 
-	d.Spec.Replicas = f.crd.Spec.Thanos.Querier.Replicas
-	d.Spec.Template.Spec.Containers[0].Resources.Limits[v1.ResourceCPU] = f.crd.Spec.Thanos.QuerierCache.Resources.Limits[v1.ResourceCPU]
-	d.Spec.Template.Spec.Containers[0].Resources.Limits[v1.ResourceMemory] = f.crd.Spec.Thanos.QuerierCache.Resources.Limits[v1.ResourceMemory]
-	d.Spec.Template.Spec.Containers[0].Resources.Requests[v1.ResourceCPU] = f.crd.Spec.Thanos.QuerierCache.Resources.Requests[v1.ResourceCPU]
-	d.Spec.Template.Spec.Containers[0].Resources.Requests[v1.ResourceMemory] = f.crd.Spec.Thanos.QuerierCache.Resources.Requests[v1.ResourceMemory]
+	// TODO(nmagnezi): Ask observatorium developers why ThanosQuerierCacheDeployment lacks resources fields
+	// d.Spec.Template.Spec.Containers[0].Resources.Limits[v1.ResourceCPU] = f.crd.Spec.Thanos.QuerierCache.Resources.Limits[v1.ResourceCPU]
+	// d.Spec.Template.Spec.Containers[0].Resources.Limits[v1.ResourceMemory] = f.crd.Spec.Thanos.QuerierCache.Resources.Limits[v1.ResourceMemory]
+	// d.Spec.Template.Spec.Containers[0].Resources.Requests[v1.ResourceCPU] = f.crd.Spec.Thanos.QuerierCache.Resources.Requests[v1.ResourceCPU]
+	// d.Spec.Template.Spec.Containers[0].Resources.Requests[v1.ResourceMemory] = f.crd.Spec.Thanos.QuerierCache.Resources.Requests[v1.ResourceMemory]
 	return d, nil
 }
 
