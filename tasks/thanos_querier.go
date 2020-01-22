@@ -21,8 +21,8 @@ import (
 )
 
 type ThanosQuerierTask struct {
-	client             *client.Client
-	factory            *manifests.Factory
+	client  *client.Client
+	factory *manifests.Factory
 }
 
 func NewThanosQuerierTask(client *client.Client, factory *manifests.Factory) *ThanosQuerierTask {
