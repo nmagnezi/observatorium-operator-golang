@@ -1,0 +1,5 @@
+packageName: observatorium-operator
+channels:
+- name: "0.0.1"
+  currentCSV: observatorium-operator.v0.0.1
+defaultChannel: "0.0.1"
