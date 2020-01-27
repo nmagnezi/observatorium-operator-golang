@@ -23,6 +23,8 @@ KUSTOMIZE_BIN="kustomize"
 KUSTOMIZE_TAR="$(KUSTOMIZE_BIN)_$(KUSTOMIZE_VERSION)_$(KUSTOMIZE_PLATFORM).tar.gz"
 KUSTOMIZE="$(TOOLS_DIR)/$(KUSTOMIZE_BIN)"
 
+CONTAINER_CLIENT=podman
+
 all: manager
 
 # Run tests
@@ -106,3 +108,12 @@ kustomize:
 	else\
 		echo "Using kustomize cached at $(KUSTOMIZE)";\
 	fi
+
+container-build-operator-courier:
+	$(CONTAINER_CLIENT) build -f tools/operator-courier/Dockerfile -t courier-build-container .
+
+bundle-push: container-build-operator-courier
+	@QUAY_USERNAME=$(QUAY_USERNAME) QUAY_PASSWORD=$(QUAY_PASSWORD) ./tools/operator-courier/push.sh
+
+
+.PHONY: bundle-push
