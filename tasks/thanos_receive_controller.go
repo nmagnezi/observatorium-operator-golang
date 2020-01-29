@@ -40,16 +40,6 @@ func (t *ThanosReceiveControllerTask) Run() error {
 		return errors.Wrap(err, "reconciling Thanos Receive Controller Service failed")
 	}
 
-	rb, err := t.factory.ThanosReceiveControllerRoleBinding()
-	if err != nil {
-		return errors.Wrap(err, "initializing Thanos Receive Controller RoleBinding failed")
-	}
-
-	err = t.client.CreateOrUpdateRoleBinding(rb)
-	if err != nil {
-		return errors.Wrap(err, "reconciling Thanos Receive Controller RoleBinding failed")
-	}
-
 	sa, err := t.factory.ThanosReceiveControllerServiceAccount()
 	if err != nil {
 		return errors.Wrap(err, "initializing Thanos Receive Controller ServiceAccount failed")
@@ -78,6 +68,16 @@ func (t *ThanosReceiveControllerTask) Run() error {
 	err = t.client.CreateOrUpdateRole(rc)
 	if err != nil {
 		return errors.Wrap(err, "reconciling Thanos Receive Controller Role config failed")
+	}
+
+	rb, err := t.factory.ThanosReceiveControllerRoleBinding()
+	if err != nil {
+		return errors.Wrap(err, "initializing Thanos Receive Controller RoleBinding failed")
+	}
+
+	err = t.client.CreateOrUpdateRoleBinding(rb)
+	if err != nil {
+		return errors.Wrap(err, "reconciling Thanos Receive Controller RoleBinding failed")
 	}
 
 	sm, err := t.factory.ThanosReceiveControllerServiceMonitor()
