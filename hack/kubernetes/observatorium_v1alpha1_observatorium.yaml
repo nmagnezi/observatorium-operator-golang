@@ -1,0 +1,83 @@
+apiVersion: observatorium.observatorium/v1alpha1
+kind: Observatorium
+metadata:
+  name: observatorium-sample
+spec:
+  thanos:
+    image: quay.io/thanos/thanos:v0.9.0
+    objectStoreConfigSecret: thanos-objectstorage
+    querier:
+      replicas: 3
+      resources:
+        limits:
+          cpu: "1"
+          memory: 1Gi
+        requests:
+          cpu: 100m
+          memory: 256Mi
+    querier-cache:
+      image: quay.io/cortexproject/cortex:master-8533a216
+      config-map: observatorium-cache-conf
+      replicas: 3
+      resources:
+        limits:
+          cpu: "1"
+          memory: 1Gi
+        requests:
+          cpu: 100m
+          memory: 256Mi
+    store:
+      replicas: 1
+      resources:
+        requests:
+          cpu: 32m
+          memory: 64Mi
+        limits:
+          cpu: 128m
+          memory: 128Mi
+      storageClass: standard
+      pvcSize: 50Gi
+    compactor:
+      replicas: 1
+      resources:
+        limits:
+          cpu: 500m
+          memory: 2Gi
+        requests:
+          cpu: 100m
+          memory: 1Gi
+    ruler:
+      replicas: 2
+      resources:
+        limits:
+          cpu: "1"
+          memory: 1Gi
+        requests:
+          cpu: 100m
+          memory: 256Mi
+    receive:
+      replicas: 3
+      resources:
+        requests:
+          cpu: 100m
+          memory: 100Mi
+      storageClass: standard
+      pvcSize: 50Gi
+    receiveController:
+      image: quay.io/observatorium/thanos-receive-controller
+      replicas: 1
+      resources:
+        requests:
+          cpu: 10m
+          memory: 24Mi
+        limits:
+          cpu: 64m
+          memory: 128Mi
+      hashrings:
+        - name: hashring0
+          tenants:
+            - foo
+            - bar
+        - name: hashring1
+          tenants:
+            - baz
