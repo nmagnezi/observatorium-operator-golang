@@ -17,16 +17,21 @@ GOBINDATA_BIN=$(FIRST_GOPATH)/bin/go-bindata
 # Copy the logic to get kustomize from performance-addon-operators
 CACHE_DIR="_cache"
 TOOLS_DIR="$(CACHE_DIR)/tools"
+PLATFORM ?= "linux_amd64"
 KUSTOMIZE_VERSION="v3.5.3"
-KUSTOMIZE_PLATFORM ?= "linux_amd64"
 KUSTOMIZE_BIN="kustomize"
-KUSTOMIZE_TAR="$(KUSTOMIZE_BIN)_$(KUSTOMIZE_VERSION)_$(KUSTOMIZE_PLATFORM).tar.gz"
+KUSTOMIZE_TAR="$(KUSTOMIZE_BIN)_$(KUSTOMIZE_VERSION)_$(PLATFORM).tar.gz"
 KUSTOMIZE="$(TOOLS_DIR)/$(KUSTOMIZE_BIN)"
+
+KUBEBUILDER_VERSION="2.2.0"
+KUBEBUILDER="kubebuilder_$(KUBEBUILDER_VERSION)_$(PLATFORM)"
+KUBEBUILDER_ASSETS := $(shell pwd)/$(TOOLS_DIR)/$(KUBEBUILDER)/bin
 
 all: manager
 
 # Run tests
-test: generate fmt vet manifests
+test: generate fmt vet manifests kubebuilder
+	export KUBEBUILDER_ASSETS=${KUBEBUILDER_ASSETS} ;\
 	go test ./... -coverprofile cover.out
 
 # Build manager binary
@@ -105,4 +110,13 @@ kustomize:
 		chmod +x $(KUSTOMIZE);\
 	else\
 		echo "Using kustomize cached at $(KUSTOMIZE)";\
+	fi
+
+kubebuilder:
+	@if [ ! -x "$(TOOLS_DIR)/$(KUBEBUILDER)" ]; then\
+		echo "Downloading kubebuilder $(KUBEBUILDER_VERSION)";\
+		mkdir -p $(TOOLS_DIR);\
+		curl -JL https://github.com/kubernetes-sigs/kubebuilder/releases/download/v$(KUBEBUILDER_VERSION)/$(KUBEBUILDER).tar.gz -o $(TOOLS_DIR)/$(KUBEBUILDER).tar.gz;\
+		tar -zxvf $(TOOLS_DIR)/$(KUBEBUILDER).tar.gz -C $(TOOLS_DIR);\
+		rm -rf $(TOOLS_DIR)/$(KUBEBUILDER).tar.gz;\
 	fi
