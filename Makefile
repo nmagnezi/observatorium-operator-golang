@@ -38,17 +38,17 @@ run: generate fmt vet manifests
 	go run ./main.go
 
 # Install CRDs into a cluster
-install: manifests kustomize
-	$(KUSTOMIZE) build config/crd | oc apply -f -
+install: manifests kustomize kube-cmd
+	$(KUSTOMIZE) build config/crd | $(KUBE_CMD) apply -f -
 
 # Uninstall CRDs from a cluster
-uninstall: manifests kustomize
-	$(KUSTOMIZE) build config/crd | oc delete -f -
+uninstall: manifests kustomize kube-cmd
+	$(KUSTOMIZE) build config/crd | $(KUBE_CMD) delete -f -
 
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
-deploy: manifests kustomize
+deploy: manifests kustomize kube-cmd
 	cd config/manager && ../../$(KUSTOMIZE) edit set image controller=${IMG}
-	$(KUSTOMIZE) build config/default | oc apply -f -
+	$(KUSTOMIZE) build config/default | $(KUBE_CMD) apply -f -
 
 # Generate manifests e.g. CRD, RBAC etc.
 manifests: controller-gen
@@ -106,3 +106,11 @@ kustomize:
 	else\
 		echo "Using kustomize cached at $(KUSTOMIZE)";\
 	fi
+
+# If kubectl is not available, use oc
+kube-cmd:
+ifeq (, $(shell which kubectl))
+KUBE_CMD=$(shell which oc)
+else
+KUBE_CMD=$(shell which kubectl)
+endif
