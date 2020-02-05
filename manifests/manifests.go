@@ -34,6 +34,8 @@ var (
 	ThanosCompactorService                = "assets/thanos-compactor-service.yaml"
 	ThanosStoreStatefulSet                = "assets/thanos-store-statefulSet.yaml"
 	ThanosStoreService                    = "assets/thanos-store-service.yaml"
+	ObservatoriumApiDeployment            = "assets/observatorium-api-deployment.yaml"
+	ObservatoriumApiService               = "assets/observatorium-api-service.yaml"
 	ThanosRulerStatefulSet                = "assets/thanos-ruler-statefulSet.yaml"
 	ThanosRulerService                    = "assets/thanos-ruler-service.yaml"
 	ThanosReceiveControllerDeployment     = "assets/thanos-receive-controller-deployment.yaml"
@@ -188,6 +190,23 @@ func (f *Factory) ThanosQuerierDeployment() (*appsv1.Deployment, error) {
 	d.Spec.Template.Spec.Containers[1].Resources.Limits[v1.ResourceMemory] = f.crd.Spec.Thanos.Querier.Resources.Limits[v1.ResourceMemory]
 	d.Spec.Template.Spec.Containers[1].Resources.Requests[v1.ResourceCPU] = f.crd.Spec.Thanos.Querier.Resources.Requests[v1.ResourceCPU]
 	d.Spec.Template.Spec.Containers[1].Resources.Requests[v1.ResourceMemory] = f.crd.Spec.Thanos.Querier.Resources.Requests[v1.ResourceMemory]
+	return d, nil
+}
+
+func (f *Factory) ObservatoriumApiDeployment() (*appsv1.Deployment, error) {
+	d, err := f.NewDeployment(MustAssetReader(ObservatoriumApiDeployment))
+	if err != nil {
+		return nil, err
+	}
+	d.Namespace = f.namespace
+	//TODO(nmagnezi):
+	// metadata: labels, name, namespace
+	// spec: selector, template.metadata, template.spec.affinity, template.spec.containers[...] missing args, image, livenessProbe, name, ports, env, readinessProbe and terminationGracePeriodSeconds
+	d.Spec.Replicas = f.crd.Spec.ObservatoriumApi.Replicas
+	d.Spec.Template.Spec.Containers[0].Resources.Limits[v1.ResourceCPU] = f.crd.Spec.ObservatoriumApi.Resources.Limits[v1.ResourceCPU]
+	d.Spec.Template.Spec.Containers[0].Resources.Limits[v1.ResourceMemory] = f.crd.Spec.ObservatoriumApi.Resources.Limits[v1.ResourceMemory]
+	d.Spec.Template.Spec.Containers[0].Resources.Requests[v1.ResourceCPU] = f.crd.Spec.ObservatoriumApi.Resources.Requests[v1.ResourceCPU]
+	d.Spec.Template.Spec.Containers[0].Resources.Requests[v1.ResourceMemory] = f.crd.Spec.ObservatoriumApi.Resources.Requests[v1.ResourceMemory]
 	return d, nil
 }
 
@@ -406,6 +425,17 @@ func (f *Factory) ThanosRulerStatefulSet() (*appsv1.StatefulSet, error) {
 
 func (f *Factory) ThanosStoreService() (*v1.Service, error) {
 	s, err := f.NewService(MustAssetReader(ThanosStoreService))
+	if err != nil {
+		return nil, err
+	}
+
+	s.Namespace = f.namespace
+
+	return s, nil
+}
+
+func (f *Factory) ObservatoriumApiService() (*v1.Service, error) {
+	s, err := f.NewService(MustAssetReader(ObservatoriumApiService))
 	if err != nil {
 		return nil, err
 	}
