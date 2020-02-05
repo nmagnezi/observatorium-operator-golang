@@ -32,12 +32,12 @@ func (t *ThanosRulerTask) Run() error {
 
 	s, err := t.factory.ThanosRulerStatefulSet()
 	if err != nil {
-		return errors.Wrap(err, "initializing Thanos Ruler Deployment failed")
+		return errors.Wrap(err, "initializing Thanos Ruler StatefulSet failed")
 	}
 
 	err = t.client.CreateOrUpdateStatefulSet(s)
 	if err != nil {
-		return errors.Wrap(err, "reconciling Thanos Ruler Deployment failed")
+		return errors.Wrap(err, "reconciling Thanos Ruler StatefulSet failed")
 	}
 	return nil
 }

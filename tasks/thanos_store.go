@@ -32,12 +32,12 @@ func (t *ThanosStoreTask) Run() error {
 
 	s, err := t.factory.ThanosStoreStatefulSet()
 	if err != nil {
-		return errors.Wrap(err, "initializing Thanos Store Deployment failed")
+		return errors.Wrap(err, "initializing Thanos Store StatefulSet failed")
 	}
 
 	err = t.client.CreateOrUpdateStatefulSet(s)
 	if err != nil {
-		return errors.Wrap(err, "reconciling Thanos Store Deployment failed")
+		return errors.Wrap(err, "reconciling Thanos Store StatefulSet failed")
 	}
 	return nil
 }

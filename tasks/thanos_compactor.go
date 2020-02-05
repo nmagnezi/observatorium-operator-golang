@@ -32,12 +32,12 @@ func (t *ThanosCompactorTask) Run() error {
 
 	s, err := t.factory.ThanosCompactorStatefulSet()
 	if err != nil {
-		return errors.Wrap(err, "initializing Thanos Compactor Deployment failed")
+		return errors.Wrap(err, "initializing Thanos Compactor StatefulSet failed")
 	}
 
 	err = t.client.CreateOrUpdateStatefulSet(s)
 	if err != nil {
-		return errors.Wrap(err, "reconciling Thanos Compactor Deployment failed")
+		return errors.Wrap(err, "reconciling Thanos Compactor StatefulSet failed")
 	}
 	return nil
 }
