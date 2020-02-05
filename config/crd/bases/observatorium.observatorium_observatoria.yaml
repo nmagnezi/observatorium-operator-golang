@@ -34,6 +34,35 @@ spec:
         spec:
           description: ObservatoriumSpec defines the desired state of Observatorium
           properties:
+            observatorium-api:
+              properties:
+                image:
+                  description: Observatorium API Image name
+                  type: string
+                replicas:
+                  format: int32
+                  type: integer
+                resources:
+                  description: Resources for component pods
+                  properties:
+                    limits:
+                      additionalProperties:
+                        type: string
+                      description: 'Limits describes the maximum amount of compute
+                        resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                      type: object
+                    requests:
+                      additionalProperties:
+                        type: string
+                      description: 'Requests describes the minimum amount of compute
+                        resources required. If Requests is omitted for a container,
+                        it defaults to Limits if that is explicitly specified, otherwise
+                        to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                      type: object
+                  type: object
+              required:
+              - image
+              type: object
             thanos:
               description: Thanos Spec
               properties:
@@ -294,6 +323,7 @@ spec:
               - store
               type: object
           required:
+          - observatorium-api
           - thanos
           type: object
         status:

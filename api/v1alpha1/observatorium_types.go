@@ -23,7 +23,16 @@ import (
 // ObservatoriumSpec defines the desired state of Observatorium
 type ObservatoriumSpec struct {
 	// Thanos Spec
-	Thanos ThanosSpec `json:"thanos"`
+	Thanos           ThanosSpec           `json:"thanos"`
+	ObservatoriumApi ObservatoriumApiSpec `json:"observatorium-api"`
+}
+
+type ObservatoriumApiSpec struct {
+	Replicas *int32 `json:"replicas,omitempty"`
+	// Observatorium API Image name
+	Image *string `json:"image"`
+	// Resources for component pods
+	Resources v1.ResourceRequirements `json:"resources,omitempty"`
 }
 
 type ReceiveController struct {
